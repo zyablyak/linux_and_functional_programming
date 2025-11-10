@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика библиотеки</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .stats-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .stat-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .popular-list {
+            list-style: none;
+        }
+
+        .popular-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Статистика библиотеки</h1>
+            <a href="{{ url_for('index') }}" class="back-link">← Назад к поиску</a>
+        </header>
+
+        <div class="stats-card">
+            <div class="stat-item">
+                <div class="stat-label">Всего книг в библиотеке:</div>
+                <div class="stat-value">{{ stats.total_books }}</div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-label">Количество жанров:</div>
+                <div class="stat-value">{{ stats.genres_count }}</div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-label">Количество авторов:</div>
+                <div class="stat-value">{{ stats.authors_count }}</div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-label">Диапазон годов публикации:</div>
+                <div class="stat-value">{{ stats.year_range }}</div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-label">Популярные жанры:</div>
+                <ul class="popular-list">
+                    {% for genre in stats.popular_genres %}
+                    <li>{{ genre }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

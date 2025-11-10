@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рекомендации книг</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .results-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .book-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-select {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .book-checkbox {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .book-select label {
+            cursor: pointer;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .book-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .book-author {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .book-genre {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-bottom: 8px;
+        }
+
+        .book-year {
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .book-score {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .book-description {
+            color: #555;
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin-top: 10px;
+        }
+
+        .save-section {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-save {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-save:hover {
+            background: #45a049;
+        }
+
+        .btn-save:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .selection-info {
+            margin-bottom: 15px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .no-results {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .select-all {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Результаты рекомендаций</h1>
+            <a href="{{ url_for('index') }}" class="back-link">← Назад к поиску</a>
+        </header>
+
+        <div class="results-info">
+            <h3>Найдено книг: {{ books|length }}</h3>
+            <p>Отметьте книги, которые хотите добавить в список для чтения</p>
+
+            {% if preferences.authors %}
+            <p><strong>Авторы:</strong> Только выбранные авторы</p>
+            {% endif %}
+            
+            {% if strict_genre %}
+            <p><strong>Жанры:</strong> Только выбранные жанры (строгая фильтрация)</p>
+            {% elif preferences.genres %}
+            <p><strong>Жанры:</strong> Учитываются при подсчете рейтинга</p>
+            {% endif %}
+            
+            {% if sort_by and sort_by != 'score' %}
+            <p><strong>Сортировка:</strong> 
+                {% if sort_by == 'title' %}По названию (А-Я)
+                {% elif sort_by == 'title_asc' %}По названию (Я-А)
+                {% elif sort_by == 'year' %}По году (новые сначала)
+                {% elif sort_by == 'year_asc' %}По году (старые сначала)
+                {% elif sort_by == 'author' %}По автору (А-Я)
+                {% else %}По релевантности{% endif %}
+            </p>
+            {% endif %}
+        </div>
+
+        {% if books %}
+        <form method="POST" action="{{ url_for('save') }}" id="saveForm">
+            <div class="select-all">
+                <input type="checkbox" id="selectAll" class="book-checkbox">
+                <label for="selectAll" style="font-weight: bold;">Выбрать все книги</label>
+            </div>
+
+            <div class="books-grid">
+                {% for book in books %}
+                <div class="book-card">
+                    <div class="book-select">
+                        <input type="checkbox" name="selected_books" value="{{ loop.index0 }}" class="book-checkbox individual-checkbox">
+                        <label>Добавить в список прочитать</label>
+                    </div>
+                    <div class="book-title">{{ book.title }}</div>
+                    <div class="book-author">{{ book.author }}</div>
+                    <div class="book-genre">{{ book.genre }}</div>
+                    <div class="book-year">Год: {{ book.year }}</div>
+                    <div class="book-score">Рейтинг: {{ book.score }}</div>
+                    <div class="book-description">{{ book.description }}</div>
+
+                    <input type="hidden" name="book_data_{{ loop.index0 }}" value="{{ book | tojson | forceescape }}">
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="save-section">
+                <div class="selection-info">
+                    Выбрано книг: <span id="selectedCount">0</span> из {{ books|length }}
+                </div>
+                <button type="submit" class="btn-save" id="saveButton" disabled>💾 Сохранить выбранные книги</button>
+            </div>
+        </form>
+
+        <script>
+            function updateSelectionCount() {
+                const checkboxes = document.querySelectorAll('.individual-checkbox:checked');
+                const count = checkboxes.length;
+                document.getElementById('selectedCount').textContent = count;
+                document.getElementById('saveButton').disabled = count === 0;
+            }
+
+            document.getElementById('selectAll').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.individual-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateSelectionCount();
+            });
+
+            document.querySelectorAll('.individual-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const allChecked = document.querySelectorAll('.individual-checkbox:checked').length === 
+                                      document.querySelectorAll('.individual-checkbox').length;
+                    document.getElementById('selectAll').checked = allChecked;
+                    updateSelectionCount();
+                });
+            });
+
+            updateSelectionCount();
+        </script>
+
+        {% else %}
+        <div class="no-results">
+            <h3>К сожалению, по вашему запросу ничего не найдено</h3>
+            <p>Попробуйте изменить критерии поиска</p>
+            <a href="{{ url_for('index') }}" class="back-link">Вернуться к поиску</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
